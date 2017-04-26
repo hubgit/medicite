@@ -1,12 +1,13 @@
 import React from 'react'
-import resource from 'fetch-resource'
-import './App.css'
 import TextField from 'material-ui/TextField';
 import SearchIcon from 'material-ui-icons/Search';
 import Button from 'material-ui/Button'
 import IconButton from 'material-ui/IconButton'
 import { List, ListItem, ListItemText } from 'material-ui/List';
+import resource from 'fetch-resource'
 import querystring from 'querystring'
+
+import './App.css'
 
 export default class App extends React.Component {
   constructor (props) {
