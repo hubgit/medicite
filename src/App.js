@@ -52,7 +52,7 @@ export default class App extends React.Component {
     const sorts = {
       'citations': 'sort_cited:y',
       'relevance': null,
-      'age': 'sort_newest:y',
+      'date': 'sort_date:y',
     }
 
     const params = {
@@ -102,7 +102,7 @@ export default class App extends React.Component {
             <SortSelect selected={sort} options={{
               'citations': 'Most cited first',
               'relevance': 'Most relevant first',
-              'age': 'Most recent first'
+              'date': 'Most recent first'
             }} onChange={this.sort}/>
           </div>
         </div>
