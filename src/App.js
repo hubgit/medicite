@@ -80,7 +80,12 @@ export default class App extends React.Component {
 
     resource('https://www.ebi.ac.uk/europepmc/webservices/rest/search', params)
       .json()
-      .then(response => this.setState({response}))
+      .then(response => {
+        this.setState({response})
+        if (response.hitCount) {
+          this.select(response.resultList.result[0].pmid)
+        }
+      })
   }
 
   search = (query, sort) => {
@@ -118,14 +123,19 @@ export default class App extends React.Component {
         <div id="results">
           <form onSubmit={this.submit}>
             <div style={{display: 'flex'}}>
-              <TextField name="query" value={typedQuery} style={{flex: 1}}
-                         onChange={this.change}/>
+              <TextField name="query"
+                     value={typedQuery}
+                     placeholder="Enter search terms…"
+                     style={{flex: 1}}
+                     onChange={this.change}/>
               <IconButton type="submit"><SearchIcon/></IconButton>
             </div>
           </form>
 
-          <div style={{display: 'flex', justifyContent: 'space-between'}}>
-            { hitCount && <Button>{hitCount.toLocaleString()} results</Button> }
+          {!query && <div>^ Enter query terms to search PubMed via Europe PubMed Central</div>}
+
+          {!!hitCount && <div style={{display: 'flex', justifyContent: 'space-between'}}>
+            <Button>{hitCount.toLocaleString()} results</Button>
 
             <SortSelect selected={sort} options={{
               'citations': 'Most cited first',
@@ -133,12 +143,13 @@ export default class App extends React.Component {
               'date': 'Most recent first'
             }} onChange={this.sort}/>
 
-            {<Button style={{visibility: nextCursorMark ? 'visible' : 'hidden'}}
-                     onClick={() => this.transition(query, sort, nextCursorMark)}>Next page</Button>}
+            <Button style={{visibility: nextCursorMark ? 'visible' : 'hidden'}}
+                     onClick={() => this.transition(query, sort, nextCursorMark)}>Next page</Button>
+          </div>}
 
-          </div>
-
-          {resultList && <List>{resultList.result.map(item => <Item key={item.id} result={item} select={this.select}/>)}</List>}
+          {resultList && <List>
+            {resultList.result.map(item => <Item key={item.id} result={item} select={this.select} selected={item.id === selected}/>)}
+            </List>}
         </div>
 
         <div id="item">

@@ -48,11 +48,13 @@ export default class Article extends React.Component {
         <div id="title">{article.title.replace(/\.$/, '')}</div>
         <p>{article.abstractText}</p>
 
-        {article.citedByCount > 0 && <Button
-          onClick={() => search(`CITES:${article.id}_MED`, 'citations')}>{article.citedByCount + ' ' + (article.citedByCount === 1 ? 'citation' : 'citations')}</Button>}
+        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+          {article.citedByCount > 0 && <Button
+            onClick={() => search(`CITES:${article.id}_MED`, 'citations')}>Cited by {article.citedByCount}</Button>}
 
-        {article.hasReferences === 'Y' && <Button
-          onClick={() => search(`REFFED_BY:${article.id}_MED`)}>References</Button>}
+          {article.hasReferences === 'Y' && <Button
+            onClick={() => search(`REFFED_BY:${article.id}_MED`)}>References</Button>}
+        </div>
       </div>
     )
   }
