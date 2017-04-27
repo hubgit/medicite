@@ -60,6 +60,7 @@ export default class App extends React.Component {
 
     this.state = {
       query: '',
+      pageSize: 10,
       sort: 'sort_cited:y',
       response: {},
       selectedResult: null,
@@ -67,24 +68,27 @@ export default class App extends React.Component {
   }
 
   componentDidMount () {
-    this.setup()
+    this.setup(this.props.location.search)
   }
 
-  setup () {
-    const {location: {search}} = this.props
+  componentWillReceiveProps (nextProps) {
+    this.setup(nextProps.location.search)
+  }
+
+  setup (search) {
     const { query } = querystring.parse(search.replace(/^\?/, ''))
 
-    if (query) {
+    if (query && query !== this.state.query) {
       this.search(query)
     }
   }
 
   search = (query, cursorMark = '*') => {
     const {history} = this.props
-    const {sort, response: {hitCount}} = this.state
+    const {sort, pageSize, response: {hitCount}} = this.state
 
     if (cursorMark === '*') {
-      history.push('?query=' + query)
+      history.push('?query=' + encodeURIComponent(query))
     }
 
     this.setState({query, response: {hitCount}})
@@ -96,6 +100,7 @@ export default class App extends React.Component {
       resulttype: 'core',
       synonym: 'true',
       format: 'json',
+      pageSize,
       cursorMark,
     }
 
@@ -124,12 +129,12 @@ export default class App extends React.Component {
   }
 
   render () {
-    const {query, response: {hitCount, nextCursorMark, resultList}, selectedResult, sort} = this.state
+    const {query, response: {hitCount, nextCursorMark, resultList}, selectedResult, sort, pageSize} = this.state
 
     return (
       <div id="container">
         <div id="form">
-          { hitCount && <div>{hitCount} results</div> }
+          { hitCount && <div>{hitCount.toLocaleString()} results</div> }
 
           <div>
             <SortSelect options={{
@@ -156,8 +161,8 @@ export default class App extends React.Component {
             ))}
           </List>
 
-          {nextCursorMark && <Button style={{width:'100%'}}
-                                     onClick={() => this.search(query, nextCursorMark)}>Next page</Button>}
+          {nextCursorMark && resultList.result.length === pageSize && <Button style={{width:'100%'}}
+                                     onClick={() => this.search(query, nextCursorMark)}>Next page {nextCursorMark}</Button>}
         </div>
 
           <div id="item">
