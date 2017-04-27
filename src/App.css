@@ -23,3 +23,16 @@ html, body, #root {
   font-weight: 100;
 }
 
+.author {
+  display: inline-block;
+  padding: 5px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  background: #d4eaf2;
+  cursor: pointer
+}
+
+.author:hover {
+  background: lightblue;
+}

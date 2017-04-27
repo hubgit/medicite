@@ -46,7 +46,10 @@ export default class Article extends React.Component {
     return (
       <div>
         <div id="title">{article.title.replace(/\.$/, '')}</div>
+
         <p>{article.abstractText}</p>
+
+        <div>{ article.authorList.author.map(author => <span className="author" onClick={() => search(`AUTHOR:"${author.fullName}"`)}>{author.fullName}</span>)}</div>
 
         <div style={{display: 'flex', justifyContent: 'space-between'}}>
           {article.citedByCount > 0 && <Button
