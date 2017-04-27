@@ -4,55 +4,11 @@ import SearchIcon from 'material-ui-icons/Search';
 import Button from 'material-ui/Button'
 import IconButton from 'material-ui/IconButton'
 import { List, ListItem, ListItemText } from 'material-ui/List'
-import { Menu, MenuItem } from 'material-ui/Menu'
 import resource from 'fetch-resource'
 import querystring from 'querystring'
 
 import './App.css'
-
-class SortSelect extends React.Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      open: false,
-      anchorEl: undefined,
-      selectedIndex: props.selected,
-    }
-  }
-
-  handleListItemClick = (event) => {
-    this.setState({open: true, anchorEl: event.currentTarget});
-  }
-
-  handleMenuItemClick = (selectedIndex) => {
-    this.setState({selectedIndex, open: false})
-    this.props.onChange(selectedIndex)
-  }
-
-  render () {
-    const { options } = this.props
-    const { selectedIndex, anchorEl, open } = this.state
-
-    return (
-      <div>
-        <List>
-          <ListItem button onClick={this.handleListItemClick}>
-            <ListItemText primary="Sort" secondary={options[selectedIndex]} />
-          </ListItem>
-        </List>
-
-        <Menu anchorEl={anchorEl} open={open} onRequestClose={() => this.setState({open: false})}>
-          {Object.keys(options).map((index) => (
-            <MenuItem key={index}
-                selected={index === selectedIndex}
-                onClick={() => this.handleMenuItemClick(index)}>{options[index]}</MenuItem>
-          ))}
-        </Menu>
-      </div>
-    )
-  }
-}
+import SortSelect from './SortSelect'
 
 export default class App extends React.Component {
   constructor (props) {
@@ -61,7 +17,7 @@ export default class App extends React.Component {
     this.state = {
       query: '',
       pageSize: 10,
-      sort: 'sort_cited:y',
+      sort: 'citations',
       response: {},
       selectedResult: null,
     }
@@ -76,27 +32,31 @@ export default class App extends React.Component {
   }
 
   setup (search) {
-    const { query } = querystring.parse(search.replace(/^\?/, ''))
+    const { query, sort } = querystring.decode(search.replace(/^\?/, ''))
 
-    if (query && query !== this.state.query) {
-      this.search(query)
+    this.setState({
+      query: query,
+      sort: sort || 'citations'
+    })
+
+    if (query) {
+      setTimeout(() => this.search(), 0)
     }
   }
 
-  search = (query, cursorMark = '*') => {
-    const {history} = this.props
-    const {sort, pageSize, response: {hitCount}} = this.state
+  search = (cursorMark = '*') => {
+    const {query, sort, pageSize, response: {hitCount}} = this.state
 
-    if (cursorMark === '*') {
-      history.push('?query=' + encodeURIComponent(query))
+    this.setState({response: {hitCount}})
+
+    const sorts = {
+      'citations': 'sort_cited:y',
+      'relevance': null,
+      'age': 'sort_newest:y',
     }
 
-    this.setState({query, response: {hitCount}})
-
-    const queryParts = [query, sort]
-
     const params = {
-      query: queryParts.join(' '),
+      query: [query, sorts[sort]].join(' '),
       resulttype: 'core',
       synonym: 'true',
       format: 'json',
@@ -106,7 +66,7 @@ export default class App extends React.Component {
 
     resource('https://www.ebi.ac.uk/europepmc/webservices/rest/search', params)
       .json()
-      .then(response => { this.setState({response}) })
+      .then(response => this.setState({response}))
   }
 
   change = (event) => {
@@ -118,18 +78,20 @@ export default class App extends React.Component {
   }
 
   submit = (event) => {
-    event.preventDefault();
-    this.search(this.state.query)
+    event.preventDefault()
+    this.transition(this.state.query, this.state.sort)
   }
 
   sort = (sort) => {
-    console.log('sort', sort)
-    this.setState({ sort })
-    setTimeout(() => this.search(this.state.query), 0)
+    this.transition(this.state.query, sort)
+  }
+
+  transition = (query, sort) => {
+    this.props.history.push({ ...location, search: querystring.encode({ query, sort }) })
   }
 
   render () {
-    const {query, response: {hitCount, nextCursorMark, resultList}, selectedResult, sort, pageSize} = this.state
+    const {query, response: {hitCount, nextCursorMark, resultList}, selectedResult, sort} = this.state
 
     return (
       <div id="container">
@@ -137,18 +99,19 @@ export default class App extends React.Component {
           { hitCount && <div>{hitCount.toLocaleString()} results</div> }
 
           <div>
-            <SortSelect options={{
-              'sort_cited:y': 'Most cited first',
-              '': 'Most relevant first',
-              'sort_date:y': 'Most recent first'
-            }} onChange={this.sort} selected={sort}/>
+            <SortSelect selected={sort} options={{
+              'citations': 'Most cited first',
+              'relevance': 'Most relevant first',
+              'age': 'Most recent first'
+            }} onChange={this.sort}/>
           </div>
         </div>
 
         <div id="results">
           <form onSubmit={this.submit}>
             <div style={{display: 'flex'}}>
-              <TextField name="query" value={query} onChange={this.change} style={{flex: 1}}/>
+              <TextField name="query" value={query} style={{flex: 1}}
+                         onChange={this.change}/>
               <IconButton type="submit"><SearchIcon/></IconButton>
             </div>
           </form>
@@ -156,13 +119,14 @@ export default class App extends React.Component {
           <List>
             {resultList && resultList.result.map(result => (
               <ListItem button key={result.id}>
-                <ListItemText primary={result.title.replace(/\.$/, '')} onClick={() => this.select(result)}/>
+                <ListItemText primary={result.title.replace(/\.$/, '')}
+                              onClick={() => this.select(result)}/>
               </ListItem>
             ))}
           </List>
 
-          {nextCursorMark && resultList.result.length === pageSize && <Button style={{width:'100%'}}
-                                     onClick={() => this.search(query, nextCursorMark)}>Next page {nextCursorMark}</Button>}
+          {nextCursorMark && <Button style={{width:'100%'}}
+                                     onClick={() => this.search(query, nextCursorMark)}>Next page</Button>}
         </div>
 
           <div id="item">
