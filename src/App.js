@@ -3,22 +3,25 @@ import TextField from 'material-ui/TextField';
 import SearchIcon from 'material-ui-icons/Search';
 import Button from 'material-ui/Button'
 import IconButton from 'material-ui/IconButton'
-import { List, ListItem, ListItemText } from 'material-ui/List'
+import { List } from 'material-ui/List'
 import resource from 'fetch-resource'
 import querystring from 'querystring'
 
 import './App.css'
 import SortSelect from './SortSelect'
+import Article from './Article'
+import Item from './Item'
 
 export default class App extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = {
-      query: '',
-      pageSize: 10,
+      typedQuery: '',
+      pageSize: 7,
       sort: 'citations',
       response: {},
+      cursor: '*',
       selectedResult: null,
     }
   }
@@ -32,20 +35,31 @@ export default class App extends React.Component {
   }
 
   setup (search) {
-    const { query, sort } = querystring.decode(search.replace(/^\?/, ''))
+    const { query, sort, cursor, selected } = querystring.decode(search.replace(/^\?/, ''))
+
+    const prevState = Object.assign({}, this.state)
 
     this.setState({
-      query: query,
-      sort: sort || 'citations'
+      query,
+      typedQuery: query,
+      cursor: cursor || '*',
+      sort: sort || 'citations',
+      selected
     })
 
-    if (query) {
-      setTimeout(() => this.search(), 0)
-    }
+    setTimeout(() => {
+      if (this.state.query && (
+        this.state.query !== prevState.query
+        || this.state.cursor !== prevState.cursor
+        || this.state.sort !== prevState.sort
+      )) {
+        this.fetch()
+      }
+    }, 10)
   }
 
-  search = (cursorMark = '*') => {
-    const {query, sort, pageSize, response: {hitCount}} = this.state
+  fetch = () => {
+    const {query, sort, cursor, pageSize, response: {hitCount}} = this.state
 
     this.setState({response: {hitCount}})
 
@@ -56,12 +70,12 @@ export default class App extends React.Component {
     }
 
     const params = {
-      query: [query, sorts[sort]].join(' '),
-      resulttype: 'core',
+      query: [query, 'src:med', sorts[sort]].join(' '),
+      resulttype: 'lite',
       synonym: 'true',
       format: 'json',
       pageSize,
-      cursorMark,
+      cursorMark: cursor,
     }
 
     resource('https://www.ebi.ac.uk/europepmc/webservices/rest/search', params)
@@ -69,74 +83,67 @@ export default class App extends React.Component {
       .then(response => this.setState({response}))
   }
 
-  change = (event) => {
-    this.setState({ query: event.target.value })
+  search = (query, sort) => {
+    this.transition(query, sort || this.state.sort)
   }
 
-  select = (selectedResult) => {
-    this.setState({selectedResult})
+  change = (event) => {
+    this.setState({ typedQuery: event.target.value })
+  }
+
+  select = (selected) => {
+    const {query, sort, cursor} = this.state
+    this.transition(query, sort, cursor, selected)
   }
 
   submit = (event) => {
     event.preventDefault()
-    this.transition(this.state.query, this.state.sort)
+    this.search(this.state.typedQuery)
   }
 
   sort = (sort) => {
-    this.transition(this.state.query, sort)
+    const {query} = this.state
+    this.transition(query, sort)
   }
 
-  transition = (query, sort) => {
-    this.props.history.push({ ...location, search: querystring.encode({ query, sort }) })
+  transition = (query, sort, cursor, selected) => {
+    this.props.history.push({ ...location, search: querystring.encode({ query, sort, cursor, selected }) })
   }
 
   render () {
-    const {query, response: {hitCount, nextCursorMark, resultList}, selectedResult, sort} = this.state
+    const {typedQuery, query, response: {hitCount, nextCursorMark, resultList}, selected, sort} = this.state
 
     return (
       <div id="container">
-        <div id="form">
-          { hitCount && <div>{hitCount.toLocaleString()} results</div> }
-
-          <div>
-            <SortSelect selected={sort} options={{
-              'citations': 'Most cited first',
-              'relevance': 'Most relevant first',
-              'date': 'Most recent first'
-            }} onChange={this.sort}/>
-          </div>
-        </div>
-
         <div id="results">
           <form onSubmit={this.submit}>
             <div style={{display: 'flex'}}>
-              <TextField name="query" value={query} style={{flex: 1}}
+              <TextField name="query" value={typedQuery} style={{flex: 1}}
                          onChange={this.change}/>
               <IconButton type="submit"><SearchIcon/></IconButton>
             </div>
           </form>
 
-          <List>
-            {resultList && resultList.result.map(result => (
-              <ListItem button key={result.id}>
-                <ListItemText primary={result.title.replace(/\.$/, '')}
-                              onClick={() => this.select(result)}/>
-              </ListItem>
-            ))}
-          </List>
+          <div style={{display: 'flex', justifyContent: 'space-between'}}>
+            { hitCount && <Button>{hitCount.toLocaleString()} results</Button> }
 
-          {nextCursorMark && <Button style={{width:'100%'}}
-                                     onClick={() => this.search(query, nextCursorMark)}>Next page</Button>}
+            <SortSelect selected={sort} options={{
+              'citations': 'Most cited first',
+              'relevance': 'Most relevant first',
+              'date': 'Most recent first'
+            }} onChange={this.sort}/>
+
+            {<Button style={{visibility: nextCursorMark ? 'visible' : 'hidden'}}
+                     onClick={() => this.transition(query, sort, nextCursorMark)}>Next page</Button>}
+
+          </div>
+
+          {resultList && <List>{resultList.result.map(item => <Item key={item.id} result={item} select={this.select}/>)}</List>}
         </div>
 
-          <div id="item">
-            { selectedResult && (
-              <div>
-                <div id="title">{selectedResult.title.replace(/\.$/, '')}</div>
-                <p>{selectedResult.abstractText}</p>
-              </div>
-            )}
-          </div>
+        <div id="item">
+          {selected && <Article pmid={selected} select={this.select} search={this.search}/>}
+        </div>
       </div>
     )
   }

@@ -1,6 +1,7 @@
 import React from 'react'
-import { List, ListItem, ListItemText } from 'material-ui/List'
+import Button from 'material-ui/Button'
 import { Menu, MenuItem } from 'material-ui/Menu'
+import ArrowDropDownIcon from 'material-ui-icons/ArrowDropDown';
 
 export default class SortSelect extends React.Component {
   constructor (props) {
@@ -21,7 +22,7 @@ export default class SortSelect extends React.Component {
     this.setState({selectedIndex: nextProps.selected})
   }
 
-  handleListItemClick = (event) => {
+  openMenu = (event) => {
     this.setState({open: true, anchorEl: event.currentTarget});
   }
 
@@ -36,11 +37,7 @@ export default class SortSelect extends React.Component {
 
     return (
       <div>
-        <List>
-          <ListItem button onClick={this.handleListItemClick}>
-            <ListItemText primary="Sort" secondary={options[selectedIndex]}/>
-          </ListItem>
-        </List>
+        <Button onClick={this.openMenu}>{options[selectedIndex]} <ArrowDropDownIcon/></Button>
 
         <Menu anchorEl={anchorEl} open={open} onRequestClose={() => this.setState({open: false})}>
           {Object.keys(options).map((index) => (

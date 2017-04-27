@@ -19,28 +19,20 @@ html, body, #root {
   display: flex;
 }
 
-#form {
-  width: 200px;
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding: 1rem;
-}
-
 #results {
   flex: 1;
-  max-width: 40%;
+  padding: 0 1rem;
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
 #item {
-  width: 40%;
+  flex: 1;
+  padding: 1rem;
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 1rem;
 }
 
 #title {
