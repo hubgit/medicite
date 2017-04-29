@@ -14,20 +14,20 @@ export default class Article extends React.Component {
   }
 
   componentDidMount () {
-    this.fetch(this.props.pmid)
+    this.fetch(this.props)
   }
 
   componentWillReceiveProps (nextProps) {
-    if (nextProps.pmid !== this.props.pmid) {
-      this.fetch(nextProps.pmid)
+    if (nextProps.match.params.pmid !== this.props.match.params.pmid) {
+      this.fetch(nextProps)
     }
   }
 
-  fetch = (pmid) => {
+  fetch = ({ match }) => {
     this.setState({ article: undefined, references: undefined, citations: undefined })
 
     const params = {
-      query: 'src:med ext_id:' + pmid,
+      query: 'src:med ext_id:' + match.params.pmid,
       resulttype: 'core',
       format: 'json',
     }
@@ -38,18 +38,20 @@ export default class Article extends React.Component {
   }
 
   render () {
-    const {search} = this.props
+    const {search, select} = this.props
     const {article} = this.state
 
     if (!article) return null
 
     return (
       <div>
+        <Button onClick={() => select(null)}>Back to results</Button>
+
         <div id="title">{article.title.replace(/\.$/, '')}</div>
 
         <p>{article.abstractText}</p>
 
-        <div>{ article.authorList.author.map(author => <span className="author" onClick={() => search(`AUTHOR:"${author.fullName}"`)}>{author.fullName}</span>)}</div>
+        <div>{ article.authorList.author.map((author, index) => <span className="author" key={index} onClick={() => search(`AUTHOR:"${author.fullName}"`)}>{author.fullName}</span>)}</div>
 
         <div style={{display: 'flex', justifyContent: 'space-between'}}>
           {article.citedByCount > 0 && <Button

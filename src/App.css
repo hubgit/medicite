@@ -3,19 +3,25 @@ html, body, #root {
   margin: 0;
 }
 
-#container {
-  display: flex;
-  flex-wrap: wrap;
+.hidden {
+  display: none;
 }
 
-#results {
-  flex: 1;
-  padding: 0 1rem;
-}
+@media (min-width: 600px) {
+  #container {
+    display: flex;
+    flex-wrap: wrap;
+  }
 
-#item {
-  flex: 1;
-  padding: 1rem;
+  #results {
+    flex: 1;
+    padding: 0 1rem;
+  }
+
+  #item {
+    flex: 1;
+    padding: 1rem;
+  }
 }
 
 #title {

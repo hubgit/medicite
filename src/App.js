@@ -11,43 +11,47 @@ import './App.css'
 import SortSelect from './SortSelect'
 import Article from './Article'
 import Item from './Item'
+import Route from 'react-router-dom/Route'
 
 export default class App extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = {
+      query: '',
       typedQuery: '',
       pageSize: 7,
       sort: 'citations',
       response: {},
       cursor: '*',
-      selectedResult: null,
     }
   }
 
   componentDidMount () {
-    this.setup(this.props.location.search)
+    this.setup(this.props)
   }
 
   componentWillReceiveProps (nextProps) {
-    this.setup(nextProps.location.search)
+    this.setup(nextProps)
   }
 
-  setup (search) {
-    const { query, sort, cursor, selected } = querystring.decode(search.replace(/^\?/, ''))
+  setup ({ location, match }) {
+    const { query, sort, cursor } = querystring.decode(location.search.replace(/^\?/, ''))
+    // const selected = match.params.pmid // FIXME: not available here
+    // console.log(selected)
 
     const prevState = Object.assign({}, this.state)
 
     this.setState({
-      query,
-      typedQuery: query,
+      query: query || '',
+      typedQuery: query || '',
       cursor: cursor || '*',
       sort: sort || 'citations',
-      selected
+      // selected: selected || null
     })
 
     setTimeout(() => {
+      console.log(this.state, prevState)
       if (this.state.query && (
         this.state.query !== prevState.query
         || this.state.cursor !== prevState.cursor
@@ -82,8 +86,8 @@ export default class App extends React.Component {
       .json()
       .then(response => {
         this.setState({response})
-        if (response.hitCount) {
-          this.select(response.resultList.result[0].pmid)
+        if (response.hitCount && this.state.selected) {
+          this.setState({ selected: response.resultList.result[0].pmid })
         }
       })
   }
@@ -112,15 +116,21 @@ export default class App extends React.Component {
   }
 
   transition = (query, sort, cursor, selected) => {
-    this.props.history.push({ ...location, search: querystring.encode({ query, sort, cursor, selected }) })
+    this.props.history.push({
+      ...location,
+      pathname: selected ? `/article/${selected}` : '/',
+      search: querystring.encode({ query, sort, cursor })
+    })
   }
 
   render () {
     const {typedQuery, query, response: {hitCount, nextCursorMark, resultList}, selected, sort} = this.state
 
+    // TODO: hide results on small screens when item is selected
+
     return (
       <div id="container">
-        <div id="results">
+        <div id="results" className={selected ? 'hidden' : ''}>
           <form onSubmit={this.submit}>
             <div style={{display: 'flex'}}>
               <TextField name="query"
@@ -153,7 +163,8 @@ export default class App extends React.Component {
         </div>
 
         <div id="item">
-          {selected && <Article pmid={selected} select={this.select} search={this.search}/>}
+          <Route exact path="/article/:pmid"
+                render={props => <Article {...props} select={this.select} search={this.search}/>}/>
         </div>
       </div>
     )

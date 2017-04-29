@@ -9,7 +9,7 @@ import App from './App';
 ReactDOM.render(
   <MuiThemeProvider>
     <BrowserRouter>
-      <Route exact path="/" component={App}/>
+      <Route path="/" component={App}/>
     </BrowserRouter>
   </MuiThemeProvider>,
   document.getElementById('root')
