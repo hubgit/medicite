@@ -3,6 +3,7 @@ import TextField from 'material-ui/TextField';
 import SearchIcon from 'material-ui-icons/Search';
 import Button from 'material-ui/Button'
 import IconButton from 'material-ui/IconButton'
+import ChevronRightIcon from 'material-ui-icons/ChevronRight';
 import { List } from 'material-ui/List'
 import resource from 'fetch-resource'
 import querystring from 'querystring'
@@ -151,19 +152,21 @@ export default class App extends React.Component {
               'relevance': 'Most relevant first',
               'date': 'Most recent first'
             }} onChange={this.sort}/>
-
-            <Button style={{visibility: nextCursorMark ? 'visible' : 'hidden'}}
-                     onClick={() => this.transition(query, sort, nextCursorMark)}>Next page</Button>
           </div>}
 
           {resultList && <List>
             {resultList.result.map(item => <Item key={item.id} result={item} select={this.select} selected={item.id === selected}/>)}
             </List>}
+
+          {!!hitCount && <div style={{textAlign: 'right'}}>
+            <Button style={{visibility: nextCursorMark ? 'visible' : 'hidden'}}
+                    onClick={() => this.transition(query, sort, nextCursorMark)}>Next page <ChevronRightIcon/></Button>
+          </div>}
         </div>
 
         <div id="item">
           <Route exact path="/article/:pmid"
-                render={props => <Article {...props} select={this.select} search={this.search} total={hitCount}/>}/>
+                render={props => <Article {...props} select={this.select} search={this.search} total={hitCount} narrow={narrow}/>}/>
         </div>
       </div>
     )

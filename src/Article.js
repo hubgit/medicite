@@ -38,7 +38,7 @@ export default class Article extends React.Component {
   }
 
   render () {
-    const {search, select, total} = this.props
+    const {search, select, total, narrow} = this.props
     const {article} = this.state
 
     if (!article) return null
@@ -46,7 +46,7 @@ export default class Article extends React.Component {
     return (
       <div>
         <div style={{display: 'flex', justifyContent: 'space-between'}}>
-          <Button onClick={() => select(null)}>Back to {total.toLocaleString()} results</Button>
+          {narrow && <Button onClick={() => select(null)}>Back to {total.toLocaleString()} results</Button>}
 
           {article.citedByCount > 0 && <Button
             onClick={() => search(`CITES:${article.id}_MED`, 'citations')}>Cited
@@ -55,9 +55,9 @@ export default class Article extends React.Component {
 
         <div id="title">{article.title.replace(/\.$/, '')}</div>
 
-        <p>{article.abstractText}</p>
-
         <div>{ article.authorList.author.map((author, index) => <span className="author" key={index} onClick={() => search(`AUTHOR:"${author.fullName}"`)}>{author.fullName}</span>)}</div>
+
+        <p>{article.abstractText}</p>
 
         <div>
           {article.hasReferences === 'Y' && <Button
