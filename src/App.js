@@ -120,13 +120,16 @@ export default class App extends React.Component {
   }
 
   render () {
-    const {typedQuery, query, response: {hitCount, nextCursorMark, resultList}, selected, sort} = this.state
+    const {typedQuery, query, response: {hitCount, nextCursorMark, resultList}, sort} = this.state
+    const { location: { pathname }} = this.props
 
-    // TODO: hide results on small screens when item is selected
+    const matches = pathname.match(/(\d+$)/)
+    const selected = matches ? matches[1] : null
+    const narrow = document.documentElement.clientWidth < 600
 
     return (
       <div id="container">
-        <div id="results" className={selected ? 'hidden' : ''}>
+        <div id="results" className={selected && narrow ? 'hidden' : ''}>
           <form onSubmit={this.submit}>
             <div style={{display: 'flex'}}>
               <TextField name="query"

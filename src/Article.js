@@ -51,9 +51,6 @@ export default class Article extends React.Component {
           {article.citedByCount > 0 && <Button
             onClick={() => search(`CITES:${article.id}_MED`, 'citations')}>Cited
             by {article.citedByCount.toLocaleString()}</Button>}
-
-          {article.hasReferences === 'Y' && <Button
-            onClick={() => search(`REFFED_BY:${article.id}_MED`)}>References</Button>}
         </div>
 
         <div id="title">{article.title.replace(/\.$/, '')}</div>
@@ -61,6 +58,13 @@ export default class Article extends React.Component {
         <p>{article.abstractText}</p>
 
         <div>{ article.authorList.author.map((author, index) => <span className="author" key={index} onClick={() => search(`AUTHOR:"${author.fullName}"`)}>{author.fullName}</span>)}</div>
+
+        <div>
+          {article.hasReferences === 'Y' && <Button
+            onClick={() => search(`REFFED_BY:${article.id}_MED`)}>References</Button>}
+
+          {/*TODO: display references here?*/}
+        </div>
       </div>
     )
   }
