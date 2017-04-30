@@ -2,7 +2,7 @@
   "name": "medicite",
   "dependencies": {
     "fetch-resource": "^0.1.2",
-    "material-ui": "next",
+    "material-ui": "^1.0.0-alpha.11",
     "material-ui-icons": "^1.0.0-alpha.3",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
