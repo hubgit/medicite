@@ -37,8 +37,6 @@ export default class App extends React.Component {
 
   setup ({ location, match }) {
     const { query, sort, cursor } = querystring.decode(location.search.replace(/^\?/, ''))
-    // const selected = match.params.pmid // FIXME: not available here
-    // console.log(selected)
 
     const prevState = Object.assign({}, this.state)
 
@@ -47,11 +45,9 @@ export default class App extends React.Component {
       typedQuery: query || '',
       cursor: cursor || '*',
       sort: sort || 'citations',
-      // selected: selected || null
     })
 
     setTimeout(() => {
-      console.log(this.state, prevState)
       if (this.state.query && (
         this.state.query !== prevState.query
         || this.state.cursor !== prevState.cursor
@@ -145,7 +141,7 @@ export default class App extends React.Component {
           {!query && <div>^ Enter query terms to search PubMed via Europe PubMed Central</div>}
 
           {!!hitCount && <div style={{display: 'flex', justifyContent: 'space-between'}}>
-            <Button>{hitCount.toLocaleString()} results</Button>
+            <Button>{hitCount.toLocaleString() + ' ' + (hitCount === 1 ? 'result' : 'results') }</Button>
 
             <SortSelect selected={sort} options={{
               'citations': 'Most cited first',
@@ -164,7 +160,7 @@ export default class App extends React.Component {
 
         <div id="item">
           <Route exact path="/article/:pmid"
-                render={props => <Article {...props} select={this.select} search={this.search}/>}/>
+                render={props => <Article {...props} select={this.select} search={this.search} total={hitCount}/>}/>
         </div>
       </div>
     )
