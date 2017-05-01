@@ -1,6 +1,9 @@
 import React from 'react'
 import resource from 'fetch-resource'
 import Button from 'material-ui/Button'
+import Chip from 'material-ui/Chip'
+import FaceIcon from 'material-ui-icons/Face'
+import Avatar from 'material-ui/Avatar'
 
 export default class Article extends React.Component {
   constructor (props) {
@@ -55,7 +58,13 @@ export default class Article extends React.Component {
 
         <div id="title">{article.title.replace(/\.$/, '')}</div>
 
-        <div>{ article.authorList.author.map((author, index) => <span className="author" key={index} onClick={() => search(`AUTHOR:"${author.fullName}"`)}>{author.fullName}</span>)}</div>
+        <div className="authors"
+             style={{display: 'flex', flexWrap: 'wrap'}}>{ article.authorList.author.map((author, index) => <Chip
+          key={index}
+          label={author.fullName}
+          avatar={<Avatar><FaceIcon/></Avatar>}
+          onClick={() => search(`AUTHOR:"${author.fullName}"`)}
+          className="author"/>)}</div>
 
         <p>{article.abstractText}</p>
 

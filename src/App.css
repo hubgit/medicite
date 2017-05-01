@@ -44,16 +44,12 @@ html, body, #root {
   margin-bottom: 1rem;
 }
 
-.author {
-  display: inline-block;
-  padding: 5px;
+.authors .author {
   margin-right: 5px;
   margin-bottom: 5px;
-  border-radius: 5px;
   background: #d4eaf2;
-  cursor: pointer
 }
 
-.author:hover {
+.authors .author:hover {
   background: lightblue;
 }
