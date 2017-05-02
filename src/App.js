@@ -80,13 +80,8 @@ export default class App extends React.Component {
     }
 
     resource('https://www.ebi.ac.uk/europepmc/webservices/rest/search', params)
-      .json()
-      .then(response => {
-        this.setState({response})
-        if (response.hitCount && this.state.selected) {
-          this.setState({ selected: response.resultList.result[0].pmid })
-        }
-      })
+      .fetch('json')
+      .then(response => this.setState({response}))
   }
 
   search = (query, sort) => {
