@@ -144,11 +144,14 @@ export default class App extends React.Component {
           {!!hitCount && <div style={{display: 'flex', justifyContent: 'space-between'}}>
             <Button>{hitCount.toLocaleString() + ' ' + (hitCount === 1 ? 'result' : 'results') }</Button>
 
-            <SortSelect selected={sort} options={{
-              'citations': 'Most cited first',
-              'relevance': 'Most relevant first',
-              'date': 'Most recent first'
-            }} onChange={this.sort}/>
+            <SortSelect
+              selected={sort}
+              onChange={this.sort}
+              options={{
+                'citations': 'Most cited first',
+                'relevance': 'Most relevant first',
+                'date': 'Most recent first'
+              }}/>
           </div>}
 
           {resultList && <List>
