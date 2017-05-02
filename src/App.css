@@ -42,6 +42,9 @@ html, body, #root {
   font-size: 150%;
   font-weight: 100;
   margin-bottom: 1rem;
+  display: block;
+  text-decoration: none;
+  color: inherit;
 }
 
 .authors .author {

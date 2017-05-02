@@ -56,7 +56,8 @@ export default class Article extends React.Component {
             by {article.citedByCount.toLocaleString()}</Button>}
         </div>
 
-        <div id="title">{article.title.replace(/\.$/, '')}</div>
+        <a id="title" target="_blank"
+           href={'https://doi.org/' + encodeURIComponent(article.doi)}>{article.title.replace(/\.$/, '')}</a>
 
         <div className="authors"
              style={{display: 'flex', flexWrap: 'wrap'}}>{ article.authorList.author.map((author, index) => <Chip
