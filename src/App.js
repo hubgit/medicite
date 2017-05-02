@@ -128,11 +128,13 @@ export default class App extends React.Component {
         <div id="results" className={selected && narrow ? 'hidden' : ''}>
           <form onSubmit={this.submit}>
             <div style={{display: 'flex'}}>
-              <TextField name="query"
-                     value={typedQuery}
-                     placeholder="Enter search terms…"
-                     style={{flex: 1}}
-                     onChange={this.change}/>
+              <TextField
+                name="query"
+                type="search"
+                value={typedQuery}
+                placeholder="Enter search terms…"
+                style={{flex: 1}}
+                onChange={this.change}/>
               <IconButton type="submit"><SearchIcon/></IconButton>
             </div>
           </form>
