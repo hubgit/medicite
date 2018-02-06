@@ -5,9 +5,10 @@ import Route from 'react-router-dom/Route';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import App from './App';
+import theme from './theme';
 
 ReactDOM.render(
-  <MuiThemeProvider>
+  <MuiThemeProvider theme={theme}>
     <BrowserRouter>
       <Route path="/" component={App}/>
     </BrowserRouter>

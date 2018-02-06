@@ -4,7 +4,7 @@ import SearchIcon from 'material-ui-icons/Search';
 import Button from 'material-ui/Button'
 import IconButton from 'material-ui/IconButton'
 import ChevronRightIcon from 'material-ui-icons/ChevronRight';
-import { List } from 'material-ui/List'
+import List from 'material-ui/List'
 import resource from 'fetch-resource'
 import querystring from 'querystring'
 
@@ -12,20 +12,17 @@ import './App.css'
 import SortSelect from './SortSelect'
 import Article from './Article'
 import Item from './Item'
+import ErrorBoundary from './ErrorBoundary'
 import Route from 'react-router-dom/Route'
 
-export default class App extends React.Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      query: '',
-      typedQuery: '',
-      pageSize: 7,
-      sort: 'citations',
-      response: {},
-      cursor: '*',
-    }
+class App extends React.Component {
+  state = {
+    query: '',
+    typedQuery: '',
+    pageSize: 7,
+    sort: 'citations',
+    response: {},
+    cursor: '*',
   }
 
   componentDidMount () {
@@ -81,7 +78,9 @@ export default class App extends React.Component {
 
     resource('https://www.ebi.ac.uk/europepmc/webservices/rest/search', params)
       .fetch('json')
-      .then(response => this.setState({response}))
+      .then(response => {
+        this.setState({response})
+      })
   }
 
   search = (query, sort) => {
@@ -108,6 +107,8 @@ export default class App extends React.Component {
   }
 
   transition = (query, sort, cursor, selected) => {
+    const { location } = this.props
+
     this.props.history.push({
       ...location,
       pathname: selected ? `/article/${selected}` : '/',
@@ -116,7 +117,14 @@ export default class App extends React.Component {
   }
 
   render () {
-    const {typedQuery, query, response: {hitCount, nextCursorMark, resultList}, sort} = this.state
+    const {
+      typedQuery,
+      query,
+      response: {hitCount, nextCursorMark, resultList},
+      pageSize,
+      sort
+    } = this.state
+
     const { location: { pathname }} = this.props
 
     const matches = pathname.match(/(\d+$)/)
@@ -126,42 +134,53 @@ export default class App extends React.Component {
     return (
       <div id="container">
         <div id="results" className={selected && narrow ? 'hidden' : ''}>
-          <form onSubmit={this.submit}>
-            <div style={{display: 'flex'}}>
-              <TextField
-                name="query"
-                type="search"
-                value={typedQuery}
-                placeholder="Enter search terms…"
-                style={{flex: 1}}
-                onChange={this.change}/>
-              <IconButton type="submit"><SearchIcon/></IconButton>
-            </div>
-          </form>
+          <ErrorBoundary>
+            <form onSubmit={this.submit}>
+              <div style={{display: 'flex'}}>
+                <TextField
+                  name="query"
+                  type="search"
+                  value={typedQuery}
+                  placeholder="Enter search terms…"
+                  style={{flex: 1}}
+                  onChange={this.change}/>
+                <IconButton type="submit"><SearchIcon/></IconButton>
+              </div>
+            </form>
 
-          {!query && <div>^ Enter query terms to search PubMed via Europe PubMed Central</div>}
+            {!query && <div>^ Enter query terms to search PubMed via Europe PubMed Central</div>}
 
-          {!!hitCount && <div style={{display: 'flex', justifyContent: 'space-between'}}>
-            <Button>{hitCount.toLocaleString() + ' ' + (hitCount === 1 ? 'result' : 'results') }</Button>
+            {!!hitCount && <div style={{display: 'flex', justifyContent: 'space-between'}}>
+              <Button>{hitCount.toLocaleString() + ' ' + (hitCount === 1 ? 'result' : 'results') }</Button>
 
-            <SortSelect
-              selected={sort}
-              onChange={this.sort}
-              options={{
-                'citations': 'Most cited first',
-                'relevance': 'Most relevant first',
-                'date': 'Most recent first'
-              }}/>
-          </div>}
+              <SortSelect
+                selected={sort}
+                onChange={this.sort}
+                options={{
+                  'citations': 'Most cited first',
+                  'relevance': 'Most relevant first',
+                  'date': 'Most recent first'
+                }}/>
+            </div>}
+          </ErrorBoundary>
 
-          {resultList && <List>
-            {resultList.result.map(item => <Item key={item.id} result={item} select={this.select} selected={item.id === selected}/>)}
-            </List>}
+          {resultList && (
+            <ErrorBoundary>
+              <List>
+                {resultList.result.map(item => (
+                  <Item key={item.id} result={item} select={this.select} selected={item.id === selected}/>
+                ))}
+              </List>
 
-          {!!hitCount && <div style={{textAlign: 'right'}}>
-            <Button style={{visibility: nextCursorMark ? 'visible' : 'hidden'}}
+              {!!hitCount && resultList.result.length >= pageSize && (
+                <div style={{textAlign: 'right'}}>
+                  <Button
+                    style={{visibility: nextCursorMark ? 'visible' : 'hidden'}}
                     onClick={() => this.transition(query, sort, nextCursorMark)}>Next page <ChevronRightIcon/></Button>
-          </div>}
+                </div>
+              )}
+            </ErrorBoundary>
+          )}
         </div>
 
         <div id="item">
@@ -172,3 +191,5 @@ export default class App extends React.Component {
     )
   }
 }
+
+export default App

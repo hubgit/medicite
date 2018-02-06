@@ -1,33 +1,39 @@
 import React from 'react'
 import Button from 'material-ui/Button'
-import { Menu, MenuItem } from 'material-ui/Menu'
+import Menu, { MenuItem } from 'material-ui/Menu'
 import ArrowDropDownIcon from 'material-ui-icons/ArrowDropDown';
 
-export default class SortSelect extends React.Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      open: false,
-      anchorEl: undefined,
-      selectedIndex: null,
-    }
+class SortSelect extends React.Component {
+  state = {
+    open: false,
+    anchorEl: undefined,
+    selectedIndex: null,
   }
 
   componentDidMount () {
-    this.setState({selectedIndex: this.props.selected})
+    this.setState({
+      selectedIndex: this.props.selected
+    })
   }
 
   componentWillReceiveProps (nextProps) {
-    this.setState({selectedIndex: nextProps.selected})
+    this.setState({
+      selectedIndex: nextProps.selected
+    })
   }
 
   openMenu = (event) => {
-    this.setState({open: true, anchorEl: event.currentTarget});
+    this.setState({
+      open: true,
+      anchorEl: event.currentTarget
+    });
   }
 
   handleMenuItemClick = (selectedIndex) => {
-    this.setState({selectedIndex, open: false})
+    this.setState({
+      selectedIndex,
+      open: false
+    })
     this.props.onChange(selectedIndex)
   }
 
@@ -50,3 +56,5 @@ export default class SortSelect extends React.Component {
     )
   }
 }
+
+export default SortSelect

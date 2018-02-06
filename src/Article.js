@@ -5,15 +5,11 @@ import Chip from 'material-ui/Chip'
 import FaceIcon from 'material-ui-icons/Face'
 import Avatar from 'material-ui/Avatar'
 
-export default class Article extends React.Component {
-  constructor (props) {
-    super(props)
-
-    this.state = {
-      article: undefined,
-      references: undefined,
-      citations: undefined
-    }
+class Article extends React.Component {
+  state = {
+    article: undefined,
+    references: undefined,
+    citations: undefined
   }
 
   componentDidMount () {
@@ -27,7 +23,11 @@ export default class Article extends React.Component {
   }
 
   fetch = ({ match }) => {
-    this.setState({ article: undefined, references: undefined, citations: undefined })
+    this.setState({
+      article: undefined,
+      references: undefined,
+      citations: undefined
+    })
 
     const params = {
       query: 'src:med ext_id:' + match.params.pmid,
@@ -36,7 +36,7 @@ export default class Article extends React.Component {
     }
 
     return resource('https://www.ebi.ac.uk/europepmc/webservices/rest/search', params)
-      .json()
+      .fetch('json')
       .then(({resultList}) => this.setState({article: resultList.result[0]}))
   }
 
@@ -79,3 +79,5 @@ export default class Article extends React.Component {
     )
   }
 }
+
+export default Article
