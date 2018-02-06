@@ -135,7 +135,7 @@ class App extends React.Component {
       <div id="container">
         <div id="results" className={selected && narrow ? 'hidden' : ''}>
           <ErrorBoundary>
-            <form onSubmit={this.submit}>
+            <form onSubmit={this.submit} style={{marginTop: 20}}>
               <div style={{display: 'flex'}}>
                 <TextField
                   name="query"
